@@ -84,7 +84,6 @@ describe User do
 
     describe "with invalid password" do
       let(:user_for_invalid_password) { found_user.authenticate("invalid") }
-
       it { should_not eq user_for_invalid_password }
       specify { expect(user_for_invalid_password).to be_false }
     end
@@ -93,6 +92,23 @@ describe User do
   describe "with a password that's too short" do
     before { @user.password = @user.password_confirmation = "a" * 5 }
     it { should be_invalid }
+  end
+
+  describe "email address with mixed case" do
+    let(:mixed_case_email) { "Foo@ExAMPle.CoM" }
+    it "should be saved as all lower-case" do
+      @user.email = mixed_case_email
+      @user.save
+      expect(@user.reload.email).to eq mixed_case_email.downcase
+    end
+  end
+
+  describe "email address cannot have consecutive periods" do
+    let(:email_with_consecutive_periods) { "user@example..com" }
+    it "should be_invalid" do
+      @user.email = email_with_consecutive_periods
+      expect(@user).not_to be_valid
+    end
   end
 
 end
